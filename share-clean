@@ -1,0 +1,6 @@
+#!/bin/bash
+
+SHARE_DIR="/srv/example.com/dl/"
+SHARE_DUR=7
+
+find $SHARE_DIR -mindepth 1 -mtime +$SHARE_DUR -delete

@@ -4,20 +4,18 @@ SHARE_DIR="/srv/example.com/dl/"
 SHARE_HOST="https://example.com/dl/"
 
 # https://unix.stackexchange.com/a/379182
-function esc {
+esc() {
 	printf ' %q' "$@" | cut -b 2-
 }
 
 DESIRED_FILENAME=""
-if [ -n "$SSH_ORIGINAL_COMMAND" ]
-then
+if [[ -n "$SSH_ORIGINAL_COMMAND" ]]; then
 	# The original ssh command is treated as file name, escape and check
 	# for validity
-	COMMAND="`esc "$SSH_ORIGINAL_COMMAND"`"
+	COMMAND=$(esc "$SSH_ORIGINAL_COMMAND")
 
 	re='^[a-zA-Z0-9_.-]+$'
-	if ! [[ $COMMAND =~ $re ]]
-	then
+	if ! [[ $COMMAND =~ $re ]]; then
 		echo "Invalid file name, please use a-z, A-Z, 0-9 and _ . - only."
 		exit 1
 	fi
@@ -25,7 +23,7 @@ then
 	DESIRED_FILENAME="-$COMMAND"
 fi
 
-PREFIX=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1)
+PREFIX=$(tr -dc 'a-zA-Z0-9' < /dev/random | fold -w 16 | head -n 1)
 FILE="$PREFIX$DESIRED_FILENAME"
 
 cat - > "$SHARE_DIR$FILE"

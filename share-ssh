@@ -23,7 +23,7 @@ if [[ -n "$SSH_ORIGINAL_COMMAND" ]]; then
 	DESIRED_FILENAME="-$COMMAND"
 fi
 
-PREFIX=$(tr -dc 'a-zA-Z0-9' < /dev/random | fold -w 16 | head -n 1)
+PREFIX=$(tr -dc 'a-zA-Z0-9' < /dev/urandom | fold -w 16 | head -n 1)
 FILE="$PREFIX$DESIRED_FILENAME"
 
 cat - > "$SHARE_DIR$FILE"

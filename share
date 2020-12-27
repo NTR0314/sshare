@@ -1,0 +1,39 @@
+#!/bin/bash
+
+SHARE_HOST="share@example.com"
+
+FILE=$1
+DESIRED_NAME=$2
+
+confirm() {
+	read -p "Share \"$1\"? [y/N] " -n 1 -r
+	[[ $REPLY =~ ^[Yy]$ ]]
+	return
+}
+
+if [[ "$#" == 0 ]]; then
+	echo "Usage: $0 FILE/DIRECTORY [NAME]"
+	exit 1
+fi
+
+if [[ -n "$DESIRED_NAME" ]]; then NAME="$DESIRED_NAME"; else NAME=$(basename "$FILE"); fi
+NAME=$(printf "%s" "$NAME" | sed "s/[^a-zA-Z0-9_.-]//g")
+
+if [[ -d $FILE ]]; then
+	confirm "$FILE" || exit 0
+	echo ""
+
+	if [[ ! "$NAME" == *.zip ]]; then NAME="$NAME.zip"; fi
+
+	# `zip` doesn't seem to provide a flag for setting the root directory,
+	# therefore `cd` to target directory first
+	(cd "$FILE" && zip -qr - .) | ssh -T "$SHARE_HOST" "$NAME"
+elif [[ -f $FILE ]]; then
+	confirm "$FILE" || exit 0
+	echo ""
+
+	ssh -T "$SHARE_HOST" "$NAME" < "$FILE"
+else
+	echo "\"$FILE\" is not a valid file or directory"
+	exit 1
+fi
